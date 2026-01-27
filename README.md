@@ -2,7 +2,7 @@
 
 ## 1. Récupération ISO d'installation
 
-Les ISO d'installations sont disponibles sur les différents miroirs Debian. Vous trouverez la liste des miroirs Debian à cette adresse : https://www.debian.org/mirror/list.fr.html
+Les ISO d'installations sont disponibles sur les différents miroirs Debian. La liste des miroirs Debian se trouve à cette adresse : https://www.debian.org/mirror/list.fr.html
 
 Il faut ensuite naviguer dans l'arborescence dans le dossier :
 ```
