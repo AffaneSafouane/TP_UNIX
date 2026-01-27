@@ -19,8 +19,8 @@ Tout s'est bien passé, mais lors du partitionnement du disque une erreur de l'�
 
 Tout d'abord, on installe SSH avec :
 ```bash
-sudo apt update
-sudo apt install ssh
+apt update
+apt install ssh
 ```
 
 Une fois l'installation terminée, on vérifie l'état du service SSH à l'aide de la commande :
@@ -30,7 +30,7 @@ systemctl status ssh
 
 Ensuite, on modifie le fichier de configuration du démon SSH situé dans `/etc/ssh/sshd_config` en utilisant un éditeur de texte tel que nano :
 ```bash
-sudo nano /etc/ssh/sshd_config
+nano /etc/ssh/sshd_config
 ```
 
 On recherche la ligne `#PermitRootLogin prohibit-password` et on la modifie en :
@@ -252,7 +252,7 @@ Pour définir les paramètres du proxy à l'échelle du système sur Debian à p
 
 3. Une fois terminé, ajouter le bit d'exécution au script créé :
    ```bash
-   sudo chmod +x /etc/profile.d/proxy.sh
+   chmod +x /etc/profile.d/proxy.sh
    ```
 
 4. Tout utilisateur du système qui a besoin d'utiliser ces paramètres doit se déconnecter et se reconnecter :
