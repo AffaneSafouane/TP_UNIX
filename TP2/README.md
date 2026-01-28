@@ -88,7 +88,7 @@ Bien que je n'aie tapé qu'une seule commande, `ssh-copy-id` a effectué les act
    * Dossier `.ssh` : Droits `700` (Seul root peut y accéder).
    * Fichier `authorized_keys` : Droits `600` (Seul root peut lire/écrire).
 
-![](./Image07.png)
+![](./.Image07.png)
 
 ### 1.4 Exercice : Authentification par clef : depuis la machine hote
 
@@ -99,7 +99,7 @@ ssh root@IP_SERVEUR
 
 **Résultat** : La connexion s'établit instantanément sans demande de mot de passe. L'authentification par clef est maintenant opérationnelle.
 
-![](./Image08.png)
+![](./.Image08.png)
 
 ### 1.5 Exercice : Sécurisation de l'accès SSH
 
