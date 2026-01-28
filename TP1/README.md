@@ -38,7 +38,7 @@ On recherche la ligne `#PermitRootLogin prohibit-password` et on la modifie en :
 
 - Changeant la valeur de `prohibit-password` à `yes` afin d'autoriser la connexion root avec un mot de passe  
 
-    ![](./Image00.png)
+    ![](./.Image00.png)
 
 ### 2.2. Commandes
 
@@ -166,7 +166,7 @@ Cette méthode consiste à dire au système de lancer un terminal (`/bin/bash`) 
 
 2. Dès que le menu GRUB apparaît (l'écran bleu ou noir où on choisit son OS), utiliser les flèches pour sélectionner la ligne Debian (souvent la première)
 
-     ![](./Image01.png)
+     ![](./.Image01.png)
 
 3. Appuyer sur la touche `e` pour éditer les options de démarrage
 
@@ -175,14 +175,14 @@ Cette méthode consiste à dire au système de lancer un terminal (`/bin/bash`) 
    linux /boot/vmlinuz-xxx root=UUID=xxx ro quiet
    ```
 
-    ![](./Image02.png)
+    ![](./.Image02.png)
 
 5. À la fin de cette ligne, ajouter un espace puis le texte suivant :
    ```
    rw init=/bin/bash
    ```
 
-    ![](./Image03.png)
+    ![](./.Image03.png)
 
 6. Appuyer sur `Ctrl + X` ou `F10` pour démarrer avec ces paramètres temporaires
 
@@ -203,15 +203,15 @@ La méthode la plus simple et la plus sûre consiste à utiliser un Live USB de 
 
 2. Lancer l'outil GParted
 
-     ![](./Image04.png)
+     ![](./.Image04.png)
 
 3. Paramétrer le clavier
 
-   ![](./Image06.png)
+   ![](./.Image06.png)
 
 4. On verra alors nos partitions graphiquement. 
 
-     ![](./Image07.png)
+     ![](./.Image07.png)
 
 #### Agrandir la partition racine
 
@@ -221,11 +221,11 @@ Agrandir la partition est le cas le plus simple, à condition d'avoir de l'espac
 
 2. Choisir **Redimensionner/Déplacer**
 
-     ![](./Image08.png)
+     ![](./.Image08.png)
 
 3. Étirer la barre vers la droite pour combler l'espace vide
 
-     ![](./Image09.png)
+     ![](./.Image09.png)
 
 4. Cliquer sur **Redimensionner/Déplacer**
 
@@ -248,7 +248,7 @@ Pour définir les paramètres du proxy à l'échelle du système sur Debian à p
 
 2. Remplir avec nos valeurs de proxy
 
-     ![](./Image11.png)
+     ![](./.Image11.png)
 
 3. Une fois terminé, ajouter le bit d'exécution au script créé :
    ```bash
