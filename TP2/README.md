@@ -150,3 +150,81 @@ C'est un logiciel qui surveille les journaux de connexion.
 - **Action** : Utiliser un module comme `libpam-google-authenticator`.
 - **Avantages** : Même avec la clé SSH (ou le mot de passe) volée, l'attaquant a besoin du code temporaire sur ton téléphone. C'est le niveau de sécurité bancaire.
 
+## 2. Processus
+
+### 2.1 Etude des processus UNIX 
+
+1. Commande ps pour afficher la liste de tous les processus tournant sur ma machine 
+```bash 
+ps -eo pid,pcpu,user,comm,%mem,lstart,cputime,stat
+``` 
+
+L'information TIME correspond au cumulative CPU time, "[DD-]HH:MM:SS" format.
+
+Le processus ayant utilisé le plus le processeur dur ma machine : 
+```bash 
+%CPU USER     COMMAND         %MEM     TIME                  STARTED STAT
+0.4 root     kworker/0:3-eve  0.0 00:00:04 Mon Feb  2 09:44:44 2026 I
+```
+
+Le premier processus démarré lancé après le démarrage du système : 
+```bash 
+ps -eo pcpu,user,comm,%mem,lstart,cputime,stat --sort=lstart
+%CPU USER     COMMAND         %MEM                  STARTED     TIME STAT
+ 0.0 root     systemd          0.7 Mon Feb  2 09:44:43 2026 00:00:00 Ss
+```
+
+Le processus avec l'ID 1 est lancé au démarrage du système. Son heure de lancement correspond donc à l'heure de boot.
+```bash 
+ps -p 1 -o lstart=
+Mon Feb  2 09:44:43 2026
+```
+
+Temps depuis lequel le serveur tourne :
+```bash 
+uptime -p
+up 35 minutes
+```
+Nombre de processus en cours sur ma machine :
+```bash
+grep 'processes' /proc/stat
+processes 1329
+```
+
+2. Commande affichant le processus parent :
+```bash 
+ps -o ppid
+```
+
+Pour trouver lees processus parent de `ps` on peut rajouter l'argument `-H` (hiérarchie), qui affiche les processus avec une indentation, pour signifier la parenté :
+```bash 
+ps -eo pid,ppid,comm -H 
+PID    PPID COMMAND
+1       0 systemd
+687       1   sshd
+1945     687     sshd-session
+   1952    1945       sshd-session
+   1953    1952         bash
+   2126    1953           ps
+```
+
+3. Pour récupérer les parents de bash on peut aussi utiliser la commande `pstree` : 
+```bash 
+apt update
+apt search pstree 
+apt install psmisc
+```
+
+Après l'installation on tape la commande suivante :
+```bash 
+pstree -s $$
+systemd───sshd───sshd-session───sshd-session───bash───pstree
+```
+
+- `$$` est une variable shell qui contient le PID de notre terminal actuel.
+
+- `-s` (show parents) affiche les ancêtres du processus spécifié.
+
+4. La commande `top`
+
+Pour afficher les processus trier par occupation de mémoire dans l'ordre décroissant, il suffit d'appuyer sur la touche `M` une fois dans l'outil `top`.
