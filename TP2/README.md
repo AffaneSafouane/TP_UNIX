@@ -228,3 +228,95 @@ systemd───sshd───sshd-session───sshd-session───bash─�
 4. La commande `top`
 
 Pour afficher les processus trier par occupation de mémoire dans l'ordre décroissant, il suffit d'appuyer sur la touche `M` une fois dans l'outil `top`.
+
+<img width="868" height="1112" alt="image" src="https://github.com/user-attachments/assets/fee8318d-c5cc-44d2-bbd8-93eb7b3ed9fb" />
+
+Le processus le plus gourmand sur ma machine est `systemd`, qui est un system and service manager for Linux operating systems.
+
+- Voici les touches magiques pour personnaliser notre vue :
+
+`z` : Active/désactive l'affichage en couleurs.
+
+`b` : Met en gras ou en surbrillance la colonne de tri (très utile pour voir ce que l'on fait).
+
+`<` et `>` : Permettent de déplacer la colonne de tri vers la gauche ou la droite. C'est la méthode la plus simple pour changer la colonne de tri (passer de %CPU à %MEM ou PID).
+
+`f` : Accède au menu de gestion des champs (Field Management) pour ajouter/supprimer des colonnes ou choisir le tri de façon précise.
+
+- `htop` est une version moderne et beaucoup plus conviviale de top.
+
+<img width="1564" height="1113" alt="image" src="https://github.com/user-attachments/assets/078deb71-6651-4c18-af56-3ab46a731d05" />
+
+**Avantages de htop**
+Visuel : Utilise des barres de couleur pour le CPU (par cœur), la RAM et le Swap. C'est instantanément lisible.
+
+Navigation : On peut faire défiler la liste verticalement et horizontalement avec les flèches du clavier.
+
+Interaction : On peut tuer un processus (F9) ou changer sa priorité (F7/F8) sans avoir à taper son PID manuellement.
+
+Recherche : Supporte la recherche (/) et le filtrage (F4) de processus de manière intuitive.
+
+**Inconvénients de htop**
+Installation : Il n'est pas toujours installé par défaut sur les systèmes minimaux, alors que top est présent partout.
+
+Ressources : Il consomme légèrement plus de ressources que top, ce qui peut compter sur des systèmes très anciens ou très chargés.
+
+## 3 Arrêt d'un processus
+
+On souhaitye arrêter un processus avec les commandes `jobs` et `fg`. 
+
+<img width="392" height="332" alt="image" src="https://github.com/user-attachments/assets/c82418f2-ddd4-481d-8f94-ed63a4f1edbd" />
+
+```bash
+jobs
+[1]-  Stopped                 ./date.sh
+[2]+  Stopped                 ./date-toto.sh
+```
+
+<img width="200" height="202" alt="image" src="https://github.com/user-attachments/assets/a1eba131-86dc-4620-b4a3-f3e09a28735c" />
+
+<img width="199" height="273" alt="image" src="https://github.com/user-attachments/assets/25ff3925-7bcd-4ff3-95a0-f07a8758586f" />
+
+On souhaite faire la même chose mais cette fois avec `ps` et `kill`.
+```bash
+ps
+    PID TTY          TIME CMD
+   1953 pts/0    00:00:00 bash
+  15909 pts/0    00:00:00 date.sh
+  15918 pts/0    00:00:00 sleep
+  15919 pts/0    00:00:00 date-toto.sh
+```
+
+Cependant notre script, la commande sleep 1 est un processus fils. Quand le shell exécute sleep, il se met en pause et attend que le fils se termine avant de passer à la commande suivante (echo).
+Lorsqu'on envoies un kill au script parent (date.sh), celui-ci reçoit le signal, mais il est "occupé" à attendre la fin du sleep.
+Par défaut, le shell ne traite les signaux en attente qu'une fois que la commande en cours (le fils) est terminée.
+
+Dès que le sleep 1 s'arrête, le shell reçoit enfin le signal, mais il a une fraction de seconde pour l'interpréter avant de lancer l'instruction suivante (echo, puis date, puis un nouveau sleep). Si le signal arrive pile au moment où un nouveau sleep démarre, tu repars pour un tour d'attente.
+
+Contrairement au kill standard (SIGTERM) qui demande au processus de s'arrêter lui-même, le SIGKILL (9) ne s'adresse pas au script. Il s'adresse au Noyau (Kernel).
+
+Le Kernel voit le signal -9 et supprime immédiatement le processus de la table des processus, sans demander l'avis du script et sans attendre la fin du sleep en cours.
+```bash
+ps
+    PID TTY          TIME CMD
+   1953 pts/0    00:00:00 bash
+  15909 pts/0    00:00:00 date.sh
+  15918 pts/0    00:00:00 sleep
+  15919 pts/0    00:00:00 date-toto.sh
+  15928 pts/0    00:00:00 sleep
+  15942 pts/0    00:00:00 ps
+root@debiansf:~# kill -9 15909
+[1]-  Killed                  ./date.sh
+root@debiansf:~# ps
+    PID TTY          TIME CMD
+   1953 pts/0    00:00:00 bash
+  15919 pts/0    00:00:00 date-toto.sh
+  15928 pts/0    00:00:00 sleep
+  15957 pts/0    00:00:00 ps
+  root@debiansf:~# kill -9 15919
+root@debiansf:~# ps
+    PID TTY          TIME CMD
+   1953 pts/0    00:00:00 bash
+  15959 pts/0    00:00:00 ps
+[2]+  Killed                  ./date-toto.sh
+```
