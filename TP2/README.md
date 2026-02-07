@@ -157,7 +157,7 @@ C'est un logiciel qui surveille les journaux de connexion.
 1. Commande ps pour afficher la liste de tous les processus tournant sur ma machine 
 ```bash 
 ps -eo pid,pcpu,user,comm,%mem,lstart,cputime,stat
-``` 
+```
 
 L'information TIME correspond au cumulative CPU time, "[DD-]HH:MM:SS" format.
 
@@ -248,18 +248,20 @@ Le processus le plus gourmand sur ma machine est `systemd`, qui est un system an
 <img width="1564" height="1113" alt="image" src="https://github.com/user-attachments/assets/078deb71-6651-4c18-af56-3ab46a731d05" />
 
 **Avantages de htop**
-Visuel : Utilise des barres de couleur pour le CPU (par cœur), la RAM et le Swap. C'est instantanément lisible.
 
-Navigation : On peut faire défiler la liste verticalement et horizontalement avec les flèches du clavier.
+- Visuel : Utilise des barres de couleur pour le CPU (par cœur), la RAM et le Swap. C'est instantanément lisible.
 
-Interaction : On peut tuer un processus (F9) ou changer sa priorité (F7/F8) sans avoir à taper son PID manuellement.
+- Navigation : On peut faire défiler la liste verticalement et horizontalement avec les flèches du clavier.
 
-Recherche : Supporte la recherche (/) et le filtrage (F4) de processus de manière intuitive.
+- Interaction : On peut tuer un processus (F9) ou changer sa priorité (F7/F8) sans avoir à taper son PID manuellement.
+
+- Recherche : Supporte la recherche (/) et le filtrage (F4) de processus de manière intuitive.
 
 **Inconvénients de htop**
-Installation : Il n'est pas toujours installé par défaut sur les systèmes minimaux, alors que top est présent partout.
 
-Ressources : Il consomme légèrement plus de ressources que top, ce qui peut compter sur des systèmes très anciens ou très chargés.
+- Installation : Il n'est pas toujours installé par défaut sur les systèmes minimaux, alors que top est présent partout.
+
+- Ressources : Il consomme légèrement plus de ressources que top, ce qui peut compter sur des systèmes très anciens ou très chargés.
 
 ## 3 Arrêt d'un processus
 
@@ -320,3 +322,242 @@ root@debiansf:~# ps
   15959 pts/0    00:00:00 ps
 [2]+  Killed                  ./date-toto.sh
 ```
+
+## 4 Les tubes
+
+`cat` : concaténe des fichiers et les affiche sur la sortie standard
+
+`tee` : lit l’entrée standard et l’écrit à la fois dans le résultat standard et dans un ou plusieurs fichiers. Dans une redirection de résultat normale, toutes les lignes de la commande seront écrites dans un fichier, mais on ne peut pas voir le résultat en même temps. En utilisant la commande **Tee**, nous pouvons y parvenir.
+
+### Analyse de commandes
+
+`ls | cat` : Cette commande permet de transmettre à `cat` la liste des fichiers envoyés par `ls`, qui l'affiche simplement dans le terminal.
+
+```bash
+ls | cat
+date.sh
+date-toto.sh
+liste
+man
+```
+
+`ls -l | cat > liste` : Le flux de `ls -l` passe par `cat`, puis est **redirigé** par l'opérateur `>` vers le fichier nommé `liste`.
+
+```bas 
+root@debiansf:~# ls -l | cat > liste
+root@debiansf:~# ls
+date.sh  date-toto.sh  liste  man
+root@debiansf:~# cat liste
+total 8
+-rwxr-xr-x 1 root root 65 Feb  2 12:13 date.sh
+-rwxr-xr-x 1 root root 86 Feb  2 12:02 date-toto.sh
+-rw-r--r-- 1 root root  0 Feb  7 15:43 liste
+-rw-r--r-- 1 root root  0 Feb  7 15:36 man
+```
+
+`ls -l | tee liste` : prend le résultat de `ls -l`, l'écrit dans le fichier `liste` **ET** l'affiche en même temps sur votre terminal.
+
+```bash
+ls -l | tee liste
+total 8
+-rwxr-xr-x 1 root root 65 Feb  2 12:13 date.sh
+-rwxr-xr-x 1 root root 86 Feb  2 12:02 date-toto.sh
+-rw-r--r-- 1 root root  0 Feb  7 15:46 liste
+-rw-r--r-- 1 root root  0 Feb  7 15:36 man
+```
+
+`ls -l | tee liste | wc -l` : 
+
+1. `ls -l` génère la liste.
+2. `tee` enregistre cette liste dans le fichier `liste`.
+3. `tee` envoie également cette liste vers la commande suivante : `wc -l`.
+
+Le fichier `liste` est créé/mis à jour avec le détail des fichiers, et votre terminal affiche uniquement **le nombre de lignes** (grâce à `wc -l`).
+
+```bash
+ls -l | tee liste | wc -l
+5
+```
+
+## 5 Journal système rsyslog
+
+Le service rsyslog n'est pas actif sur ma machine, je vais donc l'installer. 
+
+```bas
+apt update 
+apt install rsyslog
+```
+
+Après installation, le service est actif, et le PID du démon et `1809`.
+
+```bas
+ps -eo pid,ppid,comm
+    PID    PPID COMMAND
+   1809       1 rsyslogd
+```
+
+### ryslog.conf
+
+```bash
+cat /etc/rsyslog.conf
+###############
+#### RULES ####
+###############
+
+#
+# Log anything besides private authentication messages to a single log file
+#
+*.*;auth,authpriv.none          -/var/log/syslog
+
+#
+# Log commonly used facilities to their own log file
+#
+auth,authpriv.*                 /var/log/auth.log
+cron.*                          -/var/log/cron.log
+kern.*                          -/var/log/kern.log
+mail.*                          -/var/log/mail.log
+user.*                          -/var/log/user.log
+
+#
+# Emergencies are sent to everybody logged in.
+#
+*.emerg                         :omusrmsg:*
+```
+
+`/var/log/syslog` : Presque tout ce qui se passe sur le serveur finit ici, sauf ce qui est sensible (mots de passe, connexions SSH).
+
+```bas
+cat /var/log/syslog
+2026-02-07T15:54:25.934795+01:00 debiansf systemd[1]: Listening on syslog.socket - Syslog Socket.
+2026-02-07T15:54:25.935296+01:00 debiansf systemd[1]: Starting rsyslog.service - System Logging Service...
+2026-02-07T15:54:25.934348+01:00 debiansf systemd[1]: Started rsyslog.service - System Logging Service.
+2026-02-07T15:54:25.935215+01:00 debiansf rsyslogd: imuxsock: Acquired UNIX socket '/run/systemd/journal/syslog' (fd 3) from systemd.  [v8.2504.0]
+2026-02-07T15:54:25.935329+01:00 debiansf rsyslogd: [origin software="rsyslogd" swVersion="8.2504.0" x-pid="1809" x-info="https://www.rsyslog.com"] start
+2026-02-07T15:54:25.934970+01:00 debiansf kernel: Linux version 6.12.63+deb13-amd64 (debian-kernel@lists.debian.org) (x86_64-linux-gnu-gcc-14 (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44) #1 SMP PREEMPT_DYNAMIC Debian 6.12.63-1 (2025-12-30)
+```
+
+`/var/log/auth.log` : C'est ici qu'on trouveras les tentatives de connexion, l'utilisation de `sudo`, et les erreurs de login. C'est le fichier le plus important pour la surveillance de la sécurité.
+
+```bash
+cat /var/log/auth.log
+2026-02-07T16:16:11.905711+01:00 debiansf sshd-session[2445]: Accepted publickey for root from 192.168.1.37 port 60234 ssh2: RSA SHA256:WvpNbYpgw29Xs9duM4Ej+IUSkNN36mC3SLAHdwHlT1I
+2026-02-07T16:16:11.911979+01:00 debiansf sshd-session[2445]: pam_unix(sshd:session): session opened for user root(uid=0) by root(uid=0)
+2026-02-07T16:16:11.913293+01:00 debiansf systemd-logind[604]: New session 4 of user root.
+2026-02-07T16:17:01.452790+01:00 debiansf CRON[2460]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+2026-02-07T16:17:01.457139+01:00 debiansf CRON[2460]: pam_unix(cron:session): session closed for user root
+2026-02-07T16:21:18.447004+01:00 debiansf sshd-session[2452]: Received disconnect from 192.168.1.37 port 60234:11: disconnected by user
+2026-02-07T16:21:18.452054+01:00 debiansf sshd-session[2452]: Disconnected from user root 192.168.1.37 port 60234
+2026-02-07T16:21:18.452421+01:00 debiansf sshd-session[2445]: pam_unix(sshd:session): session closed for user root
+2026-02-07T16:21:18.452747+01:00 debiansf sshd-session[2445]: syslogin_perform_logout: logout() returned an error
+2026-02-07T16:21:18.464461+01:00 debiansf systemd-logind[604]: Session 4 logged out. Waiting for processes to exit.
+2026-02-07T16:21:18.467942+01:00 debiansf systemd-logind[604]: Removed session 4.
+```
+
+`/var/log/cron.log` : Toutes les activités du planificateur de tâches.
+
+```bas
+cat /var/log/cron.log
+2026-02-07T16:17:01.454776+01:00 debiansf CRON[2462]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+2026-02-07T16:18:46.165619+01:00 debiansf cron[2530]: (CRON) INFO (pidfile fd = 3)
+2026-02-07T16:18:46.167871+01:00 debiansf cron[2530]: (CRON) INFO (Skipping @reboot jobs -- not system startup)
+```
+
+`/var/log/kern.log` : Les messages directs du noyau (ceux que tu vois aussi avec `dmesg`).
+
+```bas
+cat /var/log/kern.log
+2026-02-07T15:54:25.934970+01:00 debiansf kernel: Linux version 6.12.63+deb13-amd64 (debian-kernel@lists.debian.org) (x86_64-linux-gnu-gcc-14 (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44) #1 SMP PREEMPT_DYNAMIC Debian 6.12.63-1 (2025-12-30)
+2026-02-07T15:54:25.935523+01:00 debiansf kernel: Command line: BOOT_IMAGE=/boot/vmlinuz-6.12.63+deb13-amd64 root=UUID=45830342-4dd1-47c5-9613-5c2efaf0a64e ro quiet
+2026-02-07T15:54:25.935526+01:00 debiansf kernel: BIOS-provided physical RAM map:
+2026-02-07T15:54:25.935527+01:00 debiansf kernel: BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+```
+
+### À quoi sert cron ?
+
+Le service **cron** est un démon (service en arrière-plan) qui permet :
+
+- **Planifier l'exécution automatique de tâches** à des moments précis
+- Exécuter des scripts ou commandes de manière répétitive (quotidienne, hebdomadaire, mensuelle, etc.)
+- Gérer les tâches système de maintenance automatique
+- Exécuter des tâches utilisateur programmées
+
+### La commande tail -f
+
+La commande `tail -f` permet de :
+
+- **Suivre un fichier en temps réel** ("follow")
+- Afficher les nouvelles lignes ajoutées au fichier au fur et à mesure
+- Rester active et continuer à afficher les ajouts jusqu'à interruption (Ctrl+C)
+
+```bash
+tail -f /var/log/syslog
+2026-02-07T16:16:11.928603+01:00 debiansf systemd[1]: Started session-4.scope - Session 4 of User root.
+2026-02-07T16:17:01.454776+01:00 debiansf CRON[2462]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+2026-02-07T16:18:43.022177+01:00 debiansf dhcpcd[637]: enp0s3: requesting DHCPv6 information
+2026-02-07T16:18:46.133378+01:00 debiansf systemd[1]: Stopping cron.service - Regular background program processing daemon...
+2026-02-07T16:18:46.135048+01:00 debiansf systemd[1]: cron.service: Deactivated successfully.
+2026-02-07T16:18:46.136310+01:00 debiansf systemd[1]: Stopped cron.service - Regular background program processing daemon.
+2026-02-07T16:18:46.151043+01:00 debiansf systemd[1]: Started cron.service - Regular background program processing daemon.
+2026-02-07T16:18:46.165619+01:00 debiansf cron[2530]: (CRON) INFO (pidfile fd = 3)
+2026-02-07T16:18:46.167871+01:00 debiansf cron[2530]: (CRON) INFO (Skipping @reboot jobs -- not system startup)
+2026-02-07T16:21:18.462523+01:00 debiansf systemd[1]: session-4.scope: Deactivated successfully.
+```
+
+(Note : Sur les versions récentes de Debian, `/var/log/messages` est souvent remplacé par `/var/log/syslog`. Si le fichier `messages` n'existe pas, utilisez `syslog`)
+
+Pendant que notre commande `tail -f` tourne dans le premier terminal :
+
+1. On ouvre un **deuxième terminal**.
+2. On relance le service cron avec la commande suivante :
+
+```bash
+systemctl restart cron
+```
+
+On remarque alors que dès qu'on valide la commande dans l'autre shell, de nouvelles lignes vont apparaître instantanément dans votre fenêtre de log.
+
+```bash
+2026-02-07T16:26:29.454770+01:00 debiansf systemd[1]: Started session-6.scope - Session 6 of User root.
+2026-02-07T16:26:35.595715+01:00 debiansf systemd[1]: Stopping cron.service - Regular background program processing daemon...
+2026-02-07T16:26:35.596732+01:00 debiansf systemd[1]: cron.service: Deactivated successfully.
+2026-02-07T16:26:35.597625+01:00 debiansf systemd[1]: Stopped cron.service - Regular background program processing daemon.
+2026-02-07T16:26:35.608756+01:00 debiansf systemd[1]: Started cron.service - Regular background program processing daemon.
+2026-02-07T16:26:35.626830+01:00 debiansf cron[2743]: (CRON) INFO (pidfile fd = 3)
+2026-02-07T16:26:35.628428+01:00 debiansf cron[2743]: (CRON) INFO (Skipping @reboot jobs -- not system startup)
+```
+
+### À quoi sert logrotate ?
+
+Le fichier `/etc/logrotate.conf` configure le système **logrotate** qui permet de :
+
+1. **Rotation des fichiers de logs**
+   - Renomme les anciens fichiers de logs (ex: syslog → syslog.1)
+   - Crée de nouveaux fichiers vides pour continuer la journalisation
+2. **Compression des logs archivés**
+   - Compresse les anciens logs pour économiser l'espace disque
+   - Format généralement utilisé : gzip (.gz)
+3. **Suppression des vieux logs**
+   - Supprime automatiquement les logs trop anciens
+4. **Gestion de l'espace disque**
+   - Maintient un nombre limité de fichiers de logs
+   - Définit des politiques de rétention
+
+### dmesg
+
+**Modéle de processeur**
+
+```bas
+dmesg | grep -i "CPU0"
+[    0.197212] smpboot: CPU0: 13th Gen Intel(R) Core(TM) i7-13650HX (family: 0x6, model: 0xb7, stepping: 0x1)
+```
+
+**Cartes réseaux**
+
+```bash
+dmesg | grep -iE "eth|network|ethernet|wlan"
+[    0.832312] e1000: Intel(R) PRO/1000 Network Driver
+[    1.377956] e1000 0000:00:03.0 eth0: (PCI:33MHz:32-bit) 08:00:27:95:de:52
+[    1.377965] e1000 0000:00:03.0 eth0: Intel(R) PRO/1000 Network Connection
+[    1.379422] e1000 0000:00:03.0 enp0s3: renamed from eth0
+```
+
