@@ -196,7 +196,7 @@ processes 1329
 ps -o ppid
 ```
 
-Pour trouver lees processus parent de `ps` on peut rajouter l'argument `-H` (hiérarchie), qui affiche les processus avec une indentation, pour signifier la parenté :
+Pour trouver les processus parent de `ps` on peut rajouter l'argument `-H` (hiérarchie), qui affiche les processus avec une indentation, pour signifier la parenté :
 ```bash 
 ps -eo pid,ppid,comm -H 
 PID    PPID COMMAND
@@ -231,9 +231,9 @@ Pour afficher les processus trier par occupation de mémoire dans l'ordre décro
 
 <img width="868" height="1112" alt="image" src="https://github.com/user-attachments/assets/fee8318d-c5cc-44d2-bbd8-93eb7b3ed9fb" />
 
-Le processus le plus gourmand sur ma machine est `systemd`, qui est un system and service manager for Linux operating systems.
+Le processus le plus gourmand sur ma machine est `systemd`, qui est un gestionnaire de systèmes et de services pour les systèmes d'exploitation Linux.
 
-- Voici les touches magiques pour personnaliser notre vue :
+**Voici les touches magiques pour personnaliser notre vue :**
 
 `z` : Active/désactive l'affichage en couleurs.
 
@@ -289,7 +289,7 @@ ps
   15919 pts/0    00:00:00 date-toto.sh
 ```
 
-Cependant notre script, la commande sleep 1 est un processus fils. Quand le shell exécute sleep, il se met en pause et attend que le fils se termine avant de passer à la commande suivante (echo).
+Cependant dans notre script, la commande sleep 1 est un processus fils. Quand le shell exécute sleep, il se met en pause et attend que le fils se termine avant de passer à la commande suivante (echo).
 Lorsqu'on envoies un kill au script parent (date.sh), celui-ci reçoit le signal, mais il est "occupé" à attendre la fin du sleep.
 Par défaut, le shell ne traite les signaux en attente qu'une fois que la commande en cours (le fils) est terminée.
 
