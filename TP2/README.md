@@ -159,7 +159,7 @@ C'est un logiciel qui surveille les journaux de connexion.
 ps -eo pid,pcpu,user,comm,%mem,lstart,cputime,stat
 ```
 
-L'information TIME correspond au cumulative CPU time, "[DD-]HH:MM:SS" format.
+L'information TIME correspond au temps CPU cumulé, format "[DD-]HH:MM:SS".
 
 Le processus ayant utilisé le plus le processeur dur ma machine : 
 ```bash 
