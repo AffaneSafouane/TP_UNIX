@@ -20,6 +20,7 @@ Ce dépôt contient l'ensemble des comptes rendus de Travaux Pratiques pour le m
 | :---: | :--- | :---: |
 | **01** | Installation Serveurs | [Consulter le TP1](./TP1/README.md) |
 | **02** | Services, processus, signaux | [Consulter le TP2](./TP2/README.md) |
+| **03** | Shell bash | [Consulter le TP3](./TP3/README.md) |
 
 ---
 *Enseignant : M. Le Cocq*

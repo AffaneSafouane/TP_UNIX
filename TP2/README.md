@@ -560,4 +560,3 @@ dmesg | grep -iE "eth|network|ethernet|wlan"
 [    1.377965] e1000 0000:00:03.0 eth0: Intel(R) PRO/1000 Network Connection
 [    1.379422] e1000 0000:00:03.0 enp0s3: renamed from eth0
 ```
-
