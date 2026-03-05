@@ -1,6 +1,6 @@
 # TP 03 : Shell bash
 
-## Exercie : paramètres
+## Exercice : paramètres
 
 **Script**
 ```bash
@@ -351,12 +351,12 @@ fi
 # Crétion de l'utilisateur 
 # -u : définit l'UID
 # -g : définit le groupe principal (GID)
-# -c : définit le champ commentaire (GECOS) : on combine Nom, Prénom et Comm
+# -c : définit le champ commentaire (GECOS) : on combine Nom, Prénom et Commentaire
 # -m : force la création du répertoire personnel
 # -d : définit le chemin du home
 useradd -u "$UID_RECHERCHE" -g "$GID_VAL" -c "PRENOM $PRENOM, NOM $NOM, $COMM" -m -d "$HOME_DIR" "$LOGIN"
 
-# $? contient le code de retour de la dernière commande exécutée
+# `$?` contient le code de retour de la dernière commande exécutée
 if [ $? -eq 0 ]; then 
   echo "L'utilisateur $LOGIN a été créé avec succès."
   echo "Répertoire personnel : $HOME_DIR"
